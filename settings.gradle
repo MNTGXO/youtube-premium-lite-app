@@ -1,0 +1,2 @@
+rootProject.name = "YouTubePremiumLite"
+include ':app'
