@@ -3,6 +3,7 @@ plugins {
 }
 
 android {
+    namespace "com.example.youtubepremiumlite"   // <-- ADD THIS
     compileSdk 34
 
     defaultConfig {
