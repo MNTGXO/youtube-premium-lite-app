@@ -9,6 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
+    // ============================================================
+    //  YOUTUBE PREMIUM LITE² USERSCRIPT (FULL, UNMODIFIED)
+    // ============================================================
     private static final String USERSCRIPT =
             "// ==UserScript==\n" +
             "// @name YouTube Premium Lite² [Beta]\n" +
@@ -612,6 +615,22 @@ public class MainActivity extends AppCompatActivity {
             "\n" +
             "})();";
 
+    // ============================================================
+    //  EXTRA AD‑BLOCKING CSS (additional coverage)
+    // ============================================================
+    private static final String EXTRA_CSS =
+            "/* Hide sponsored cards, overlays, and in‑feed ads */\n" +
+            "ytd-rich-item-renderer:has(ytd-display-ad-renderer),\n" +
+            "ytd-display-ad-renderer,\n" +
+            "ytd-video-masthead-ad-v2-renderer,\n" +
+            "ytd-banner-ad-renderer,\n" +
+            "ytd-carousel-ad-renderer,\n" +
+            "ytd-ad-preview-renderer,\n" +
+            ".ytd-ad-slot-renderer,\n" +
+            "[class*='ad'] { display: none !important; }\n" +
+            "/* Remove sponsored badges */\n" +
+            ".ytd-badge-supported-renderer[badge-style*='AD'] { display: none !important; }";
+
     private WebView webView;
 
     @Override
@@ -630,11 +649,45 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                // 1. Inject main userscript
                 view.evaluateJavascript(
                         "javascript:(function() { " +
                         "var script = document.createElement('script');" +
                         "script.textContent = `" + USERSCRIPT.replace("`", "\\`").replace("$", "\\$") + "`;" +
                         "document.documentElement.appendChild(script);" +
+                        "})();",
+                        null
+                );
+
+                // 2. Inject extra CSS
+                view.evaluateJavascript(
+                        "javascript:(function() { " +
+                        "var style = document.createElement('style');" +
+                        "style.id = 'extra-ad-block-css';" +
+                        "style.textContent = `" + EXTRA_CSS + "`;" +
+                        "document.documentElement.appendChild(style);" +
+                        "})();",
+                        null
+                );
+
+                // 3. MutationObserver to remove any ad-like elements that appear later
+                view.evaluateJavascript(
+                        "javascript:(function() { " +
+                        "new MutationObserver(function(mutations) {" +
+                        "  mutations.forEach(function(mutation) {" +
+                        "    mutation.addedNodes.forEach(function(node) {" +
+                        "      if (node.nodeType === 1) {" +
+                        "        var el = node;" +
+                        "        if (el.matches && (el.matches('[class*=\"ad\" i]') || el.matches('[id*=\"ad\" i]'))) {" +
+                        "          el.remove();" +
+                        "        }" +
+                        "        if (el.querySelectorAll) {" +
+                        "          el.querySelectorAll('[class*=\"ad\" i], [id*=\"ad\" i]').forEach(function(ad) { ad.remove(); });" +
+                        "        }" +
+                        "      }" +
+                        "    });" +
+                        "  });" +
+                        "}).observe(document.documentElement, { childList: true, subtree: true });" +
                         "})();",
                         null
                 );
