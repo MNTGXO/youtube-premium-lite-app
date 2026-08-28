@@ -5,12 +5,10 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-
 import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    // The full userscript (copy‐pasted from the provided script)
     private static final String USERSCRIPT =
             "// ==UserScript==\n" +
             "// @name YouTube Premium Lite² [Beta]\n" +
@@ -627,12 +625,11 @@ public class MainActivity extends AppCompatActivity {
         settings.setDomStorageEnabled(true);
         settings.setLoadWithOverviewMode(true);
         settings.setUseWideViewPort(true);
-        settings.setUserAgentString(settings.getUserAgentString().replace("; wv", "")); // optional
+        settings.setUserAgentString(settings.getUserAgentString().replace("; wv", ""));
 
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
-                // Inject the script as early as possible (document-start equivalent)
                 view.evaluateJavascript(
                         "javascript:(function() { " +
                         "var script = document.createElement('script');" +
